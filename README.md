@@ -2,7 +2,7 @@
 
 Full-stack app for apartment societies to track maintenance complaints, priorities, overdue issues, a notice board, and email updates.
 
-**Stack:** React (Vite) + Node/Express + Prisma + SQLite (dev) / PostgreSQL (prod)
+**Stack:** React (Vite) + Node/Express + Prisma + PostgreSQL (prod)
 
 This project is configured to run **locally with zero external accounts** — SQLite for the DB, local disk storage for photos, and console-logged emails. Swap in Postgres / Cloudinary / SMTP any time for production (see below).
 
@@ -132,13 +132,18 @@ Base URL: `http://localhost:5000/api`. All routes except register/login require 
 **Real email (SMTP):** set `EMAIL_STRATEGY=smtp` and fill `SMTP_*` vars (Gmail SMTP with an App Password works on the free tier). By default `EMAIL_STRATEGY=console` just logs the email to the backend terminal so you can verify the notification flow without any account.
 
 ---
+## 🚀 Live Demo
 
-## 7. Deployment
+- **Frontend:** https://society-maintenance-tracker-iota.vercel.app
+- **Backend API:** https://society-maintenance-tracker-1.onrender.com/api
 
-- **Frontend → Vercel:** import the `frontend/` folder, set env var `VITE_API_URL=https://your-backend-url/api`.
-- **Backend → Render/Railway:** import `backend/`, set start command `npm start`, add a Postgres addon, set all `.env` vars (see `.env.example`) in the dashboard, then run `npx prisma migrate deploy && npm run seed` once via the shell.
+### Demo Credentials
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@society.com | Admin@123 |
+| Resident | resident@society.com | Resident@123 |
 
----
+> Note: Backend is on Render's free tier — first request after inactivity may take 30-50 seconds to respond (cold start).
 
 ## 8. Project Structure
 
