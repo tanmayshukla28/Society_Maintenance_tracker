@@ -1,0 +1,87 @@
+// Prisma schema for Society Maintenance Tracker
+// Using SQLite by default so the project runs locally with ZERO extra setup.
+// NOTE: SQLite does not support native Prisma `enum` types, so role/status/
+// priority are plain Strings, validated in the application layer (controllers)
+// instead of the database layer. If you switch to Postgres for production,
+// you can optionally convert these back to real `enum` blocks.
+//
+// For production (Render/Railway), switch provider to "postgresql" and set
+// DATABASE_URL to your Postgres connection string (see README).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  passwordHash  String
+  role          String   @default("resident") // "resident" | "admin"
+  flatNumber    String?
+  createdAt     DateTime @default(now())
+
+  complaints        Complaint[]        @relation("ResidentComplaints")
+  statusChangesMade ComplaintHistory[] @relation("ActorHistory")
+  notices           Notice[]           @relation("NoticeAuthor")
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+
+  complaints Complaint[]
+}
+
+model Complaint {
+  id          String    @id @default(uuid())
+  resident    User      @relation("ResidentComplaints", fields: [residentId], references: [id])
+  residentId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  categoryId  String
+  description String
+  photoUrl    String?
+  status      String    @default("Open") // "Open" | "InProgress" | "Resolved"
+  priority    String?                    // "Low" | "Medium" | "High"
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  resolvedAt  DateTime?
+
+  history ComplaintHistory[]
+
+  @@index([status])
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+model ComplaintHistory {
+  id          String    @id @default(uuid())
+  complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
+  complaintId String
+  actor       User      @relation("ActorHistory", fields: [actorId], references: [id])
+  actorId     String
+  oldStatus   String?
+  newStatus   String
+  note        String?
+  changedAt   DateTime  @default(now())
+}
+
+model Notice {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  isImportant Boolean  @default(false)
+  postedBy    User     @relation("NoticeAuthor", fields: [postedById], references: [id])
+  postedById  String
+  createdAt   DateTime @default(now())
+}
+
+model Setting {
+  key   String @id
+  value String
+}
